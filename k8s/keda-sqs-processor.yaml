@@ -1,0 +1,44 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledJob
+metadata:
+  name: keda-sqs-processor-job
+spec:
+  jobTargetRef:
+    template:
+      spec:
+        containers:
+          - name: sqs-processor
+            image: thebhandariprakash/keda-sqs-processor:latest
+            command: ["node", "processor.js"]
+            env:
+            - name: SQS_QUEUE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: aws-secrets
+                  key: SQS_QUEUE_URL
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-secrets
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                 name: aws-secrets 
+                 key: AWS_SECRET_ACCESS_KEY
+            - name: AWS_REGION
+              value: "ap-southeast-2" 
+        restartPolicy: Never
+  pollingInterval: 30  # Check the queue every 30 seconds
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 5
+  minReplicaCount: 0  # Maximum number of concurrent jobs
+  maxReplicaCount: 50  # Maximum number of concurrent jobs
+  triggers:
+    - type: aws-sqs-queue
+      authenticationRef:
+        name: keda-trigger-auth-aws-credentials
+      metadata:
+        queueURL: 'https://sqs.ap-southeast-2.amazonaws.com/{account no}/{que name}' # update the url to your URL
+        awsRegion: 'ap-southeast-2'
+        queueLength: "5"  # Scale up when there are at least 5 messages

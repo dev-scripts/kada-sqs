@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sqs-publisher
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sqs-publisher
+  template:
+    metadata:
+      labels:
+        app: sqs-publisher
+    spec:
+      containers:
+      - name: sqs-publisher
+        image: thebhandariprakash/keda-sqs-processor:latest
+        env:
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: aws-secrets
+              key: AWS_ACCESS_KEY_ID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: aws-secrets 
+              key: AWS_SECRET_ACCESS_KEY
+        - name: AWS_REGION
+          value: "ap-southeast-2" 
+        - name: SQS_QUEUE_URL
+          valueFrom:
+            secretKeyRef:
+              name: aws-secrets
+              key: SQS_QUEUE_URL
