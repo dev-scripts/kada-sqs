@@ -1,0 +1,11 @@
+{
+  "name": "keda-sqs",
+  "version": "1.0.0",
+  "description": "Scaling Kubernetes Jobs with KEDA: Triggering by Amazon SQS",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

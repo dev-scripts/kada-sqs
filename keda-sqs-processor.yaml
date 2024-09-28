@@ -1,0 +1,26 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledJob
+metadata:
+  name: keda-sqs-processor-job
+spec:
+  jobTargetRef:
+    template:
+      spec:
+        containers:
+          - name: sqs-processor
+            image: thebhandariprakash/keda-sqs-processor:latest
+            command: ["node", "index.js"]
+        restartPolicy: Never
+  pollingInterval: 30  # Check the queue every 30 seconds
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 5
+  minReplicaCount: 0  # Maximum number of concurrent jobs
+  maxReplicaCount: 50  # Maximum number of concurrent jobs
+  triggers:
+    - type: aws-sqs-queue
+      authenticationRef:
+        name: keda-trigger-auth-aws-credentials
+      metadata:
+        queueURL: 'your queue url'
+        awsRegion: 'ap-southeast-2'
+        queueLength: "5"  # Scale up when there are at least 5 messages
